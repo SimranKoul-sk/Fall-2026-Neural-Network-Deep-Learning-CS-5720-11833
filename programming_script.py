@@ -298,3 +298,6 @@ tensorboard_history = tensorboard_model.fit(
     callbacks=[tensorboard_callback],
     verbose=1
 )
+#Print the dir location so it is easy to find
+print("\nTensorBoard logs saved in:")
+print(log_dir)
