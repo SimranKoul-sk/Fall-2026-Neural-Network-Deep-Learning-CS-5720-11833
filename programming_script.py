@@ -258,7 +258,7 @@ plt.xticks(epochs)
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
-plt.savefig("loss_comparison.png", dpi=300, bbox_inches="tight")
+plt.savefig("adam_vs_sgd_accuracy.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 
