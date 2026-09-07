@@ -132,6 +132,7 @@ plt.ylabel("Loss Value")
 plt.title("MSE and Categorical Cross-Entropy Loss Comparison")
 plt.legend()
 plt.tight_layout()
+plt.savefig("loss_comparison.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 
@@ -257,6 +258,7 @@ plt.xticks(epochs)
 plt.legend()
 plt.grid(True)
 plt.tight_layout()
+plt.savefig("loss_comparison.png", dpi=300, bbox_inches="tight")
 plt.show()
 
 
