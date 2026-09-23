@@ -1,4 +1,4 @@
-# CS5720 Neural Network and Deep Learning — Home Assignment 2
+# CS5720 Neural Network and Deep Learning: Home Assignment 2
 
 ## Student Information
 
@@ -7,15 +7,15 @@
 - **Course:** CS5720 Neural Network and Deep Learning (CS-5720-11833)
 - **Semester:** Fall 2026
 - **Assignment:** Home Assignment 2
-- **University:** University of Central Missouri — Department of Computer Science & Cybersecurity
+- **University:** University of Central Missouri, Department of Computer Science & Cybersecurity
 
 ---
 
 ## Overview
 
 This branch contains the solutions for Home Assignment 2, covering recurrent
-neural networks (Questions 1–2) and convolutional neural networks
-(Questions 3–5). Each question is a standalone, fully commented Python script
+neural networks (Questions 1-2) and convolutional neural networks
+(Questions 3-5). Each question is a standalone, fully commented Python script
 that can be run on its own. All five live in the
 [`Home-Assignment-2/`](Home-Assignment-2/) folder.
 
@@ -54,9 +54,9 @@ python q5_cnn_architectures.py
 
 Questions 3, 4, and 5 finish in seconds. Questions 1 and 2 involve training:
 
-- **Q1** — measured at about 133 seconds for one epoch plus text generation on
-  a CPU, so the 10-epoch default works out to roughly 15–20 minutes.
-- **Q2** — a few minutes; early stopping typically halts it after 2–3 epochs.
+- **Q1**: measured at about 133 seconds for one epoch plus text generation on
+  a CPU, so the 10-epoch default works out to roughly 15 to 20 minutes.
+- **Q2**: a few minutes; early stopping typically halts it after 2-3 epochs.
 
 Both accept an `EPOCHS` environment variable for a quicker run:
 
@@ -81,10 +81,10 @@ python q4_cnn_feature_extraction.py my_photo.jpg
 The script trains a **character-level** LSTM: it reads 100 characters and
 predicts the single character that comes next.
 
-1. **Dataset** — the TensorFlow Shakespeare corpus (~1.1M characters), of which
+1. **Dataset**: the TensorFlow Shakespeare corpus (~1.1M characters), of which
    the first 300,000 characters are used by default to keep CPU training time
    reasonable.
-2. **Character encoding** — the text is reduced to its set of unique characters
+2. **Character encoding**: the text is reduced to its set of unique characters
    (~65 of them), and each is mapped to an integer index. Training examples are
    cut with a stride of 3 so they overlap, which yields roughly 100,000
    sequences from 300,000 characters.
@@ -93,11 +93,11 @@ predicts the single character that comes next.
    were allowed by the assignment; embeddings are used because a one-hot matrix
    of shape (100,000 × 100 × 65) would waste a large amount of memory, and a
    learned dense vector per character generally trains better.
-3. **Model** — `Embedding(65, 256)` → `LSTM(256)` → `Dropout(0.2)` →
+3. **Model**: `Embedding(65, 256)` → `LSTM(256)` → `Dropout(0.2)` →
    `Dense(65)`. The final layer deliberately has **no softmax activation**; it
    emits raw logits, which makes temperature scaling straightforward and
    numerically stable. The loss is configured with `from_logits=True` to match.
-4. **Generation** — starting from a 100-character seed, the model predicts one
+4. **Generation**: starting from a 100-character seed, the model predicts one
    character at a time. Each predicted character is appended to the output and
    slides into the input window, so the model continues from its own output.
 
@@ -128,11 +128,11 @@ the progression is visible side by side.
 ### Results
 
 After 10 epochs the model reached a training loss of **1.3774** and training
-accuracy of **0.5781** — meaning it predicts the correct next character about
+accuracy of **0.5781**, meaning it predicts the correct next character about
 58% of the time. Seeded with the opening 100 characters of the corpus, the four
 temperatures produce visibly different text:
 
-**T = 0.2** — correct spelling and believable structure, but stuck in a loop:
+**T = 0.2**: correct spelling and believable structure, but stuck in a loop:
 
 ```text
 MENENIUS:
@@ -141,7 +141,7 @@ The people the comming than the people of the people,
 That shall be convers the people of the commandant.
 ```
 
-**T = 0.5** — more varied vocabulary, occasional malformed words:
+**T = 0.5**: more varied vocabulary, occasional malformed words:
 
 ```text
 BRUTUS:
@@ -149,7 +149,7 @@ The gatest to do your grace some fall of mouth
 That was all the censents of a god of my prayor words,
 ```
 
-**T = 1.0** — inventive and far less repetitive, but many words are made up:
+**T = 1.0**: inventive and far less repetitive, but many words are made up:
 
 ```text
 CORIOLANUS:
@@ -157,7 +157,7 @@ Dich is rememplabineds, and that people
 mnouther. He wolds no metwors;
 ```
 
-**T = 1.5** — mostly nonsense words, though the play-script shape survives:
+**T = 1.5**: mostly nonsense words, though the play-script shape survives:
 
 ```text
 COMINIUS:
@@ -167,7 +167,7 @@ You knop foono'llokips: it,
 
 The progression matches the theory above. What is worth noticing is that even
 at T = 1.5 the model still produces capitalised speaker names followed by a
-colon and a line break — the format is learned so strongly that it survives
+colon and a line break. The format is learned so strongly that it survives
 heavy random sampling, long after individual words have stopped being words.
 
 ---
@@ -176,31 +176,31 @@ heavy random sampling, long after individual words have stopped being words.
 
 ### Approach
 
-1. **Dataset** — `tensorflow.keras.datasets.imdb`, 25,000 training and 25,000
+1. **Dataset**: `tensorflow.keras.datasets.imdb`, 25,000 training and 25,000
    test movie reviews, balanced 50/50 positive and negative. Keras ships it
    pre-tokenized, with each word replaced by its frequency rank.
-2. **Preprocessing** — `num_words=10000` keeps only the 10,000 most common
+2. **Preprocessing**: `num_words=10000` keeps only the 10,000 most common
    words (rarer ones become an out-of-vocabulary token), which bounds the
    embedding size. Reviews vary from 11 to 2,494 tokens, but an LSTM batch
    needs a rectangular array, so `pad_sequences` trims and zero-pads every
    review to 200 tokens.
-3. **Model** — `Embedding(10000, 128, mask_zero=True)` → `LSTM(64)` →
+3. **Model**: `Embedding(10000, 128, mask_zero=True)` → `LSTM(64)` →
    `Dropout(0.5)` → `Dense(1, sigmoid)`.
 
    `mask_zero=True` matters: it tells the LSTM to skip the padding tokens, so a
    short review padded out to 200 tokens is not diluted by 180 meaningless
    zeros. The LSTM reads the review in order and carries context forward, which
-   is what lets it handle negation such as *"not good"* — a bag-of-words model
+   is what lets it handle negation such as *"not good"*. A bag-of-words model
    would see the word "good" and get it backwards.
-4. **Training** — up to 5 epochs with an `EarlyStopping` callback watching
+4. **Training**: up to 5 epochs with an `EarlyStopping` callback watching
    validation loss (`patience=1`, `restore_best_weights=True`). This was added
    after measuring the problem directly: without it, training for a fixed 3
    epochs gave **83.18%** accuracy at a test loss of **0.5349**, while a single
    epoch gave essentially the same accuracy (83.20%) at a much better loss of
-   **0.4038**. The model was overfitting after epoch 1 — training accuracy kept
+   **0.4038**. The model was overfitting after epoch 1: training accuracy kept
    climbing while the model got worse at generalizing. Early stopping restores
    the best epoch's weights instead of whichever happened to be last.
-5. **Evaluation** — the sigmoid output is thresholded at 0.5 to produce class
+5. **Evaluation**: the sigmoid output is thresholded at 0.5 to produce class
    labels, then scored with `confusion_matrix` and `classification_report` from
    scikit-learn. The confusion matrix is also saved as
    `q2_confusion_matrix.png`.
@@ -208,7 +208,7 @@ heavy random sampling, long after individual words have stopped being words.
 ### Results
 
 Early stopping halted training at epoch 3 and restored the weights from
-epoch 2, giving **test accuracy 0.8493** at a test loss of **0.3633** — better
+epoch 2, giving **test accuracy 0.8493** at a test loss of **0.3633**, better
 on both counts than the fixed 3-epoch run it replaced.
 
 ```text
@@ -237,7 +237,7 @@ Recall    = TP / (TP + FN)   Of the reviews that really were positive, how many 
 ```
 
 The run above shows this concretely. For the positive class, precision is
-**0.8575** but recall is only **0.8378** — the model is somewhat reluctant to
+**0.8575** but recall is only **0.8378**. The model is somewhat reluctant to
 call a review positive, so when it does say positive it is usually right
 (few false positives: 1,741), but it misses more genuinely positive reviews
 (2,027 false negatives). The negative class shows the mirror image. Accuracy
@@ -257,7 +257,7 @@ Which side to favour depends entirely on what each error costs:
   class matters most. A few false alarms only cost a moment of a human's time.
 - **Pulling positive quotes for marketing**: a single negative review
   mistakenly quoted as praise is public and embarrassing, so **precision**
-  matters far more. Missing some good reviews is harmless — there are plenty.
+  matters far more. Missing some good reviews is harmless, since there are plenty.
 
 This is also why accuracy alone is insufficient. IMDB is balanced, but on a
 skewed real-world feed where 95% of reviews are positive, a model that blindly
@@ -281,8 +281,9 @@ Input matrix (5x5)              Kernel (3x3)
 ```
 
 The convolutions are performed with `tf.nn.conv2d`, which requires 4D tensors,
-so the input is reshaped to `(1, 5, 5, 1)` — `(batch, height, width, channels)` —
-and the kernel to `(3, 3, 1, 1)` — `(k_height, k_width, in_channels, out_channels)`.
+so the input is reshaped to `(1, 5, 5, 1)`, which is `(batch, height, width,
+channels)`, and the kernel to `(3, 3, 1, 1)`, which is `(k_height, k_width,
+in_channels, out_channels)`.
 
 > **Note on convolution vs. cross-correlation:** `tf.nn.conv2d` technically
 > computes cross-correlation (it does not flip the kernel). This particular
@@ -335,7 +336,7 @@ four neighbours. The Laplacian of any linear function is zero, so the interior
 response is zero everywhere.
 
 The non-zero values in the SAME results appear only along the borders, where
-the zero-padding breaks that linearity — the kernel there is comparing real
+the zero-padding breaks that linearity, since the kernel there is comparing real
 values against padded zeros.
 
 ### Why the output sizes differ
@@ -366,13 +367,13 @@ Sobel X (vertical edges)      Sobel Y (horizontal edges)
 
 Two implementation details worth noting:
 
-- **`ddepth=cv2.CV_64F`** — edge responses are *signed*: a dark-to-light edge is
+- **`ddepth=cv2.CV_64F`**: edge responses are *signed*: a dark-to-light edge is
   positive and light-to-dark is negative. Storing the result as `uint8` would
   clip every negative value to zero and silently lose half the edges. The
   results are passed through `np.absolute()` only at display time.
 - If no image path is given on the command line, the script generates a
-  200×200 sample image containing a rectangle, a circle, and a diagonal line —
-  shapes chosen so the difference between the two filters is obvious.
+  200×200 sample image containing a rectangle, a circle, and a diagonal line.
+  These shapes make the difference between the two filters obvious.
 
 The output (`q4_sobel_edge_detection.png`) shows the expected behaviour clearly:
 **Sobel-X** responds to the rectangle's *vertical* sides and the circle's left
@@ -399,7 +400,7 @@ Working through the top-left 2×2 window `[[6,3],[6,9]]`: max pooling keeps `9`,
 average pooling keeps `(6+3+6+9)/4 = 6.0`.
 
 **Max pooling** keeps the single strongest activation in each window, preserving
-the most prominent detected feature and discarding the rest — which is why it
+the most prominent detected feature and discarding the rest, which is why it
 dominates in practice for CNNs. **Average pooling** keeps the mean, which
 smooths the response and retains more background information but dilutes sharp
 features.
@@ -443,7 +444,7 @@ Two observations from the summary:
   This was one of AlexNet's contributions over earlier non-overlapping pooling.
 - **85% of the parameters sit in the fully connected layers** (21.0M of 24.8M),
   while all five convolution layers together account for only 3.7M. This is
-  exactly why the 50% dropout layers are placed on the dense layers — they are by
+  exactly why the 50% dropout layers are placed on the dense layers, since they are by
   far the most prone to overfitting.
 
 ### Task 2: Residual Block and ResNet
@@ -482,7 +483,7 @@ The full model on a 64×64×3 input:
 
 ### Comparison
 
-**AlexNet** is a plain stack — every layer feeds only the next one. Its depth is
+**AlexNet** is a plain stack: every layer feeds only the next one. Its depth is
 limited by the vanishing-gradient problem: the further back a gradient travels
 through a plain stack, the more it shrinks, until the early layers barely learn.
 
@@ -505,8 +506,8 @@ parameters.
 
 Running the scripts produces these inside `Home-Assignment-2/`:
 
-- `q1_char_lstm.keras` — the trained text-generation model, saved so generation
+- `q1_char_lstm.keras`: the trained text-generation model, saved so generation
   can be re-run without retraining (not committed; see `.gitignore`)
-- `q2_confusion_matrix.png` — labelled confusion matrix for the IMDB classifier
-- `q4_sobel_edge_detection.png` — original image alongside the Sobel-X and
+- `q2_confusion_matrix.png`: labelled confusion matrix for the IMDB classifier
+- `q4_sobel_edge_detection.png`: original image alongside the Sobel-X and
   Sobel-Y results
