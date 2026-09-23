@@ -122,6 +122,51 @@ deterministic); as `T` grows large it approaches uniform random character
 choice. The script prints generated samples at T = 0.2, 0.5, 1.0, and 1.5 so
 the progression is visible side by side.
 
+### Results
+
+After 10 epochs the model reached a training loss of **1.3774** and training
+accuracy of **0.5781** — meaning it predicts the correct next character about
+58% of the time. Seeded with the opening 100 characters of the corpus, the four
+temperatures produce visibly different text:
+
+**T = 0.2** — correct spelling and believable structure, but stuck in a loop:
+
+```text
+MENENIUS:
+The lord of the commind and better are
+The people the comming than the people of the people,
+That shall be convers the people of the commandant.
+```
+
+**T = 0.5** — more varied vocabulary, occasional malformed words:
+
+```text
+BRUTUS:
+The gatest to do your grace some fall of mouth
+That was all the censents of a god of my prayor words,
+```
+
+**T = 1.0** — inventive and far less repetitive, but many words are made up:
+
+```text
+CORIOLANUS:
+Dich is rememplabineds, and that people
+mnouther. He wolds no metwors;
+```
+
+**T = 1.5** — mostly nonsense words, though the play-script shape survives:
+
+```text
+COMINIUS:
+'Tis? Whe, I wages mady?
+You knop foono'llokips: it,
+```
+
+The progression matches the theory above. What is worth noticing is that even
+at T = 1.5 the model still produces capitalised speaker names followed by a
+colon and a line break — the format is learned so strongly that it survives
+heavy random sampling, long after individual words have stopped being words.
+
 ---
 
 ## Question 2: Sentiment Classification Using RNN
@@ -369,35 +414,34 @@ original AlexNet paper, which works cleanly with an 11×11 kernel at stride 4).
 | --- | --- | --- |
 | Conv2D (96, 11×11, stride 4, ReLU) | (55, 55, 96) | 34,944 |
 | MaxPooling2D (3×3, stride 2) | (27, 27, 96) | 0 |
-| Conv2D (256, 5×5, ReLU) | (27, 27, 256) | 614,656 |
-| MaxPooling2D (3×3, stride 2) | (13, 13, 256) | 0 |
-| Conv2D (384, 3×3, ReLU) | (13, 13, 384) | 885,120 |
-| Conv2D (384, 3×3, ReLU) | (13, 13, 384) | 1,327,488 |
-| Conv2D (256, 3×3, ReLU) | (13, 13, 256) | 884,992 |
-| MaxPooling2D (3×3, stride 2) | (6, 6, 256) | 0 |
-| Flatten | (9216,) | 0 |
-| Dense (4096, ReLU) | (4096,) | 37,752,832 |
+| Conv2D (256, 5×5, ReLU) | (23, 23, 256) | 614,656 |
+| MaxPooling2D (3×3, stride 2) | (11, 11, 256) | 0 |
+| Conv2D (384, 3×3, ReLU) | (9, 9, 384) | 885,120 |
+| Conv2D (384, 3×3, ReLU) | (7, 7, 384) | 1,327,488 |
+| Conv2D (256, 3×3, ReLU) | (5, 5, 256) | 884,992 |
+| MaxPooling2D (3×3, stride 2) | (2, 2, 256) | 0 |
+| Flatten | (1024,) | 0 |
+| Dense (4096, ReLU) | (4096,) | 4,198,400 |
 | Dropout (0.5) | (4096,) | 0 |
 | Dense (4096, ReLU) | (4096,) | 16,781,312 |
 | Dropout (0.5) | (4096,) | 0 |
 | Dense (10, Softmax) | (10,) | 40,970 |
 
-**Total parameters: 58,322,314**
+**Total parameters: 24,767,882**
 
-**Design note:** convolution layers 2–5 use `padding='same'`, as in the original
-AlexNet. The assignment did not specify padding for these layers; using `'same'`
-lets the pooling layers control the spatial size instead of losing a couple of
-pixels at every convolution, and it reproduces AlexNet's classic 6×6×256 feature
-map (9,216 values) before the flatten.
+**Padding note:** every convolution layer uses Keras's default `padding='valid'`,
+since the assignment specifies a kernel size and (where relevant) a stride but
+no padding. Each convolution therefore loses a border of pixels, which is why
+the feature map shrinks steadily from 55×55 down to 2×2 before the flatten.
 
 Two observations from the summary:
 
 - The pooling layers use a 3×3 window with stride 2, so the windows **overlap**.
   This was one of AlexNet's contributions over earlier non-overlapping pooling.
-- **93% of the parameters sit in the two 4096-neuron dense layers** (54.5M of
-  58.3M), while all five convolution layers together account for only 3.7M. This
-  is exactly why the 50% dropout layers are placed on the dense layers — they are
-  by far the most prone to overfitting.
+- **85% of the parameters sit in the fully connected layers** (21.0M of 24.8M),
+  while all five convolution layers together account for only 3.7M. This is
+  exactly why the 50% dropout layers are placed on the dense layers — they are by
+  far the most prone to overfitting.
 
 ### Task 2: Residual Block and ResNet
 
@@ -446,7 +490,7 @@ unchanged. Crucially, the `Add` gives gradients a direct path backwards that
 bypasses the convolutions entirely, which is what allows ResNets to reach
 hundreds of layers where plain stacks like AlexNet degrade past about 20.
 
-Note also where the parameters live: AlexNet's 58.3M is dominated by dense
+Note also where the parameters live: AlexNet's 24.8M is dominated by dense
 layers, and the small ResNet's 8.5M is likewise dominated by the single
 `Dense(128)` after the flatten (8.39M of 8.55M). Real ResNets replace that
 flatten with global average pooling, which removes almost all of those

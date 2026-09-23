@@ -12,14 +12,12 @@ def build_alexnet(input_shape=(227, 227, 3), num_classes=10):
     model.add(layers.Conv2D(96, kernel_size=(11, 11), strides=4, activation="relu"))
     model.add(layers.MaxPooling2D(pool_size=(3, 3), strides=2))
 
-    #Conv layers 2-5 use padding='same' as in the original AlexNet, which keeps
-    #the classic 6x6x256 feature map before the flatten.
-    model.add(layers.Conv2D(256, kernel_size=(5, 5), padding="same", activation="relu"))
+    model.add(layers.Conv2D(256, kernel_size=(5, 5), activation="relu"))
     model.add(layers.MaxPooling2D(pool_size=(3, 3), strides=2))
 
-    model.add(layers.Conv2D(384, kernel_size=(3, 3), padding="same", activation="relu"))
-    model.add(layers.Conv2D(384, kernel_size=(3, 3), padding="same", activation="relu"))
-    model.add(layers.Conv2D(256, kernel_size=(3, 3), padding="same", activation="relu"))
+    model.add(layers.Conv2D(384, kernel_size=(3, 3), activation="relu"))
+    model.add(layers.Conv2D(384, kernel_size=(3, 3), activation="relu"))
+    model.add(layers.Conv2D(256, kernel_size=(3, 3), activation="relu"))
     model.add(layers.MaxPooling2D(pool_size=(3, 3), strides=2))
 
     model.add(layers.Flatten())
