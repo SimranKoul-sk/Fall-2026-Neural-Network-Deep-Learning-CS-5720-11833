@@ -5,6 +5,7 @@ from tensorflow.keras import layers, models
 
 #Task 1: Implement AlexNet Architecture
 
+#Build the simplified AlexNet described in the assignment.
 def build_alexnet(input_shape=(227, 227, 3), num_classes=10):
     model = models.Sequential(name="Simplified_AlexNet")
     model.add(layers.Input(shape=input_shape))
@@ -33,6 +34,7 @@ def build_alexnet(input_shape=(227, 227, 3), num_classes=10):
 
 #Task 2: Implement a Residual Block and ResNet
 
+#Build a residual block whose skip connection is added before the activation.
 def residual_block(input_tensor, filters):
     x = layers.Conv2D(filters, kernel_size=(3, 3), padding="same", activation="relu")(
         input_tensor
@@ -45,6 +47,7 @@ def residual_block(input_tensor, filters):
     return x
 
 
+#Build the small ResNet from an initial convolution and two residual blocks.
 def build_resnet(input_shape=(64, 64, 3), num_classes=10):
     inputs = layers.Input(shape=input_shape)
 
@@ -62,6 +65,7 @@ def build_resnet(input_shape=(64, 64, 3), num_classes=10):
     return models.Model(inputs=inputs, outputs=outputs, name="Simple_ResNet")
 
 
+#Print the model summaries for both architectures.
 def main():
     print("=" * 70)
     print("Task 1: Simplified AlexNet")

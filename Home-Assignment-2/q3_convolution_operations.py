@@ -5,6 +5,7 @@ import tensorflow as tf
 
 #Step 1: Define the 5x5 input matrix
 
+#Return the 5x5 input matrix given in the assignment.
 def build_input_matrix():
     return np.array(
         [
@@ -19,6 +20,7 @@ def build_input_matrix():
 
 #Step 2: Define the 3x3 kernel
 
+#Return the 3x3 Laplacian kernel given in the assignment.
 def build_kernel():
     return np.array(
         [
@@ -31,6 +33,7 @@ def build_kernel():
 
 #Step 3: Perform the convolution operations
 
+#Apply one 2D convolution and return the feature map as a 2D array.
 def convolve(input_matrix, kernel, stride, padding):
     #tf.nn.conv2d needs 4D tensors: input is (batch, height, width, channels)
     #and the kernel is (k_height, k_width, in_channels, out_channels).
@@ -50,6 +53,7 @@ def convolve(input_matrix, kernel, stride, padding):
 
 #Step 4: Print the output feature maps
 
+#Print a labelled matrix with aligned columns and its shape.
 def print_matrix(title, matrix):
     print(f"\n{title}")
     print(f"Output shape: {matrix.shape[0]} x {matrix.shape[1]}")
@@ -57,6 +61,7 @@ def print_matrix(title, matrix):
         print("  " + "  ".join(f"{value:7.1f}" for value in row))
 
 
+#Run all four stride/padding combinations and print each feature map.
 def main():
     input_matrix = build_input_matrix()
     kernel = build_kernel()

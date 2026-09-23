@@ -11,6 +11,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 #Task 1: Implement Edge Detection Using Convolution
 
+#Build a 200x200 grayscale image with shapes that produce clear edges.
 def create_sample_image():
     image = np.zeros((200, 200), dtype=np.uint8)
     cv2.rectangle(image, (30, 30), (110, 110), color=200, thickness=-1)
@@ -19,6 +20,7 @@ def create_sample_image():
     return image
 
 
+#Load an image as grayscale, or fall back to the generated sample.
 def load_grayscale_image(image_path=None):
     if image_path:
         image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
@@ -28,6 +30,7 @@ def load_grayscale_image(image_path=None):
     return create_sample_image(), "generated sample image"
 
 
+#Apply the assignment's Sobel kernels in the x and y directions.
 def apply_sobel_filters(image):
     sobel_x_kernel = np.array(
         [
@@ -59,6 +62,7 @@ def apply_sobel_filters(image):
     return sobel_x, sobel_y
 
 
+#Show the original beside both Sobel results and save the figure.
 def display_edge_results(original, sobel_x, sobel_y):
     images = [original, np.absolute(sobel_x), np.absolute(sobel_y)]
     titles = [
@@ -83,6 +87,7 @@ def display_edge_results(original, sobel_x, sobel_y):
     plt.show()
 
 
+#Run the full Sobel edge-detection task.
 def run_task1(image_path=None):
     print("=" * 60)
     print("Task 1: Edge Detection using Sobel Filter")
@@ -101,6 +106,7 @@ def run_task1(image_path=None):
 
 #Task 2: Implement Max Pooling and Average Pooling
 
+#Apply 2x2 max pooling and 2x2 average pooling to a random 4x4 matrix.
 def run_task2():
     print("\n" + "=" * 60)
     print("Task 2: Pooling Operations on a Random 4x4 Matrix")
@@ -119,6 +125,7 @@ def run_task2():
     max_pooled = max_pool_layer(input_tensor).numpy()[0, :, :, 0]
     average_pooled = average_pool_layer(input_tensor).numpy()[0, :, :, 0]
 
+    #Print one labelled matrix with its shape.
     def show(title, array):
         print(f"\n{title} (shape {array.shape[0]}x{array.shape[1]}):")
         for row in array:
@@ -133,6 +140,7 @@ def run_task2():
     )
 
 
+#Run both tasks in order.
 def main():
     image_path = sys.argv[1] if len(sys.argv) > 1 else None
     run_task1(image_path)

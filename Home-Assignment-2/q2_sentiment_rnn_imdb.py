@@ -25,6 +25,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 #Step 1: Load the IMDB sentiment dataset
 #Step 2: Preprocess the text data by tokenization and padding sequences
 
+#Load the IMDB dataset and pad every review to a fixed length.
 def load_and_preprocess():
     print("Loading the IMDB dataset...")
     (x_train, y_train), (x_test, y_test) = tf.keras.datasets.imdb.load_data(
@@ -52,6 +53,7 @@ def load_and_preprocess():
     return (x_train, y_train), (x_test, y_test)
 
 
+#Decode one padded review back into words to show what the model sees.
 def show_example_review(x_train, y_train):
     word_index = tf.keras.datasets.imdb.get_word_index()
 
@@ -76,6 +78,7 @@ def show_example_review(x_train, y_train):
 
 #Step 3: Train an LSTM-based model to classify reviews
 
+#Build the LSTM sentiment classifier.
 def build_model():
     model = tf.keras.Sequential(
         [
@@ -101,6 +104,7 @@ def build_model():
 
 #Step 4: Generate a confusion matrix and classification report
 
+#Score the model on the test set and print the confusion matrix and report.
 def evaluate_model(model, x_test, y_test):
     print("\n" + "=" * 70)
     print("Evaluation on the Test Set")
@@ -147,6 +151,7 @@ def evaluate_model(model, x_test, y_test):
 
 #Step 5: Interpret why the precision-recall tradeoff is important
 
+#Print the written interpretation of the precision-recall tradeoff.
 def explain_precision_recall():
     print("\n" + "=" * 70)
     print("Why the Precision-Recall Tradeoff Matters in Sentiment Classification")
@@ -163,6 +168,7 @@ def explain_precision_recall():
     )
 
 
+#Load the data, train the classifier, evaluate it, then explain the metrics.
 def main():
     #Fixed seeds so results can be reproduced between runs.
     np.random.seed(42)

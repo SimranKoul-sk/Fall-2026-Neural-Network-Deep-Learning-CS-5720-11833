@@ -19,6 +19,7 @@ SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 #Step 1: Load the text dataset
 
+#Download the Shakespeare corpus and return the configured slice of it.
 def load_text():
     path = tf.keras.utils.get_file(
         "shakespeare.txt",
@@ -39,6 +40,7 @@ def load_text():
 
 #Step 2: Convert the text into sequences of characters
 
+#Build the character vocabulary and the two lookup tables.
 def build_vocabulary(text):
     vocab = sorted(set(text))
     char_to_id = {char: index for index, char in enumerate(vocab)}
@@ -47,6 +49,7 @@ def build_vocabulary(text):
     return vocab, char_to_id, id_to_char
 
 
+#Cut the text into overlapping input/target pairs of integer indices.
 def build_training_sequences(text, char_to_id):
     inputs = []
     targets = []
@@ -66,6 +69,7 @@ def build_training_sequences(text, char_to_id):
 
 #Step 3: Define the LSTM model
 
+#Build the character-level LSTM that predicts the next character.
 def build_model(vocab_size):
     model = tf.keras.Sequential(
         [
@@ -89,12 +93,14 @@ def build_model(vocab_size):
 
 #Step 4: Generate text by sampling one character at a time
 
+#Pick the next character index from the logits, scaled by temperature.
 def sample_with_temperature(logits, temperature):
     scaled = np.asarray(logits, dtype=np.float64) / temperature
     exponentiated = np.exp(scaled - np.max(scaled))
     probabilities = exponentiated / np.sum(exponentiated)
     return int(np.random.choice(len(probabilities), p=probabilities))
 
+#Generate text one character at a time starting from a seed string.
 def generate_text(model, seed_text, char_to_id, id_to_char, temperature,
                   num_chars=400):
     context = seed_text[-SEQ_LENGTH:]
@@ -111,6 +117,7 @@ def generate_text(model, seed_text, char_to_id, id_to_char, temperature,
 
     return "".join(generated)
 
+#Load the data, train the model, then generate text at four temperatures.
 def main():
     #Fixed seeds so results can be reproduced between runs.
     np.random.seed(42)
