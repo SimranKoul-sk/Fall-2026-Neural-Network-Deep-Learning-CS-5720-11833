@@ -144,3 +144,115 @@ that both strides happened to visit. Striding discards measurements rather than
 combining them, which is exactly what distinguishes it from pooling.
 
 ---
+
+## Question 2: Transfer Learning, Freeze vs Fine-Tune
+
+### Setup
+
+| Item | Value |
+| --- | --- |
+| Pretrained model | ResNet50, ImageNet weights, `include_top=False` |
+| Dataset | `flower_photos`, 5 classes (daisy, dandelion, roses, sunflowers, tulips) |
+| Split | 2,936 training images / 734 validation images (80/20, seed 42) |
+| Input size | 224 x 224 x 3 |
+| Batch size | 32 |
+| Epochs | 5 for both experiments |
+
+Images go through `resnet50.preprocess_input` rather than a plain 0-1 rescale,
+because ResNet50 was trained with its own channel scaling. Both experiments use
+the identical classification head: global average pooling, 20% dropout, then a
+`Dense(5, softmax)` layer.
+
+### Experiment A: Frozen Feature Extractor
+
+`base.trainable = False` freezes all 23.6M convolution weights, so the
+pretrained network acts purely as a fixed feature extractor and only the new
+classifier learns. Learning rate 1e-3.
+
+### Experiment B: Fine-Tuned Network
+
+The base is loaded the same way, then only the `conv5_*` layers (the last
+residual block) are unfrozen, along with the classifier. Everything earlier
+stays frozen, preserving the general edge and texture filters.
+
+Two deliberate choices here:
+
+- **BatchNorm layers stay frozen even inside conv5.** Updating their running
+  statistics on a few thousand images is a well-known way to damage a
+  pretrained network, so they are kept in inference mode.
+- **Learning rate 1e-4, ten times smaller than Experiment A.** Experiment A
+  only trains a randomly initialised head, so it can take a normal rate.
+  Experiment B updates pretrained convolution weights, which a large rate would
+  destroy. This is a necessary property of fine-tuning rather than an attempt
+  to make the comparison look a particular way.
+
+### (f) Comparison
+
+| Method | Trainable Parameters | Training Time | Accuracy |
+| --- | --- | --- | --- |
+| Frozen Feature Extractor | 10,245 | 367.4 s | 0.9074 |
+| Fine-Tuned Network | 14,963,717 | 459.8 s | 0.9183 |
+
+Supporting numbers:
+
+| Method | Non-trainable params | Validation loss | Final training loss |
+| --- | --- | --- | --- |
+| Frozen Feature Extractor | 23,587,712 | 0.3274 | about 0.16 |
+| Fine-Tuned Network | 8,634,240 | 0.4452 | about 0.03 |
+
+### (e) Training Loss
+
+![Training loss comparison](Home-Assignment-3/q2_training_loss.png)
+
+The fine-tuned network starts lower and falls much faster, flattening near 0.03
+by epoch 4. The frozen extractor descends more gently and levels off around
+0.16. That ordering is expected: the fine-tuned model has roughly 1,460 times
+more trainable parameters, so it has far more capacity to fit the training set.
+
+### (g) Discussion
+
+The frozen feature extractor trains only 10,245 parameters while the fine-tuned
+network trains 14,963,717, about 1,460 times more, because the first updates a
+single dense layer and the second also updates the whole conv5 residual block.
+That gap explains the difference in training time: both models run the same
+forward pass, but the frozen model needs gradients only for the last layer,
+whereas the fine-tuned model has to backpropagate through the final block and
+hold those activations in memory, which cost it 459.8 s against 367.4 s. The
+saving from freezing would be larger still if more of the network were
+unfrozen. Accuracy moves for a different reason: ImageNet features are already
+close to what flower photos need, so a linear classifier on frozen features is
+a strong baseline at 90.74% and gets most of the way there on its own.
+Fine-tuning edged ahead to 91.83% because the last block holds the most
+task-specific features, and letting those adapt lets the network re-tune what
+it treats as discriminative for flowers rather than for ImageNet classes. The
+gain was small, though, and the extra capacity came at a cost that the accuracy
+column hides. In short, freezing is faster and safer on a small dataset, while
+fine-tuning costs more time and needs more care but has the higher ceiling when
+the new task differs more from the pretraining task than flowers do from
+ImageNet.
+
+### A result worth noticing
+
+The fine-tuned network has **higher accuracy but worse validation loss**
+(0.4452 against 0.3274), while its training loss is five times lower. Those
+three facts together are a textbook overfitting signature: the model is fitting
+the training set almost perfectly, and although it still gets slightly more
+validation images right, it has become overconfident on the ones it gets wrong,
+which is what drives cross-entropy up.
+
+This is the practical argument for the two safeguards described above. It also
+suggests that on this dataset the extra 92 seconds of training buys about one
+percentage point of accuracy, so the frozen extractor is arguably the better
+engineering choice here. Fine-tuning pays off more clearly when the target
+domain is further from ImageNet, such as medical or satellite imagery, where
+the pretrained features genuinely need to change.
+
+---
+
+## Output Files
+
+Running the scripts produces this inside `Home-Assignment-3/`:
+
+- `q2_training_loss.png` - training loss curves for both experiments
+
+Question 1 prints everything to the terminal and writes no files.
