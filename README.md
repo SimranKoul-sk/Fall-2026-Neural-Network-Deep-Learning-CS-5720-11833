@@ -1,186 +1,146 @@
-# Fall-2026-Neural-Network-Deep-Learning-CS-5720-11833
+# CS5720 Neural Network and Deep Learning: Home Assignment 3
 
 ## Student Information
 
 - **Name:** Simran Koul
 - **Student ID:** 700809605
-- **Course:** Neural Network & Deep Learning (CS-5720-11833)
-- **Assignment:** Part II — Programming
-- **Date:** September 11, 2026
+- **Course:** CS5720 Neural Network and Deep Learning (CS-5720-11833)
+- **Semester:** Fall 2026
+- **Assignment:** Home Assignment 3, Part II (Programming)
+- **University:** University of Central Missouri, Department of Computer Science & Cybersecurity
+
+---
 
 ## Overview
 
-This repository contains the Python code for Part II of the Neural Network & Deep Learning assignment. The program uses TensorFlow and Matplotlib to demonstrate tensor operations, loss functions, MNIST model training with two optimizers, and TensorBoard logging.
+This branch contains the Part II programming solutions for Home Assignment 3.
+Each question is a standalone, commented Python script in the
+[`Home-Assignment-3/`](Home-Assignment-3/) folder.
 
-The assignment is divided into four parts:
+| File | Question | Topic |
+| --- | --- | --- |
+| [`q1_convolution_from_scratch.py`](Home-Assignment-3/q1_convolution_from_scratch.py) | Q1 | 2-D convolution implemented without a built-in convolution function |
+| [`q2_transfer_learning.py`](Home-Assignment-3/q2_transfer_learning.py) | Q2 | Transfer learning with ResNet50: frozen feature extraction vs fine-tuning |
 
-1. Tensor reshaping and broadcasting
-2. Loss function comparison
-3. MNIST training with Adam and SGD
-4. MNIST training with TensorBoard logging
+---
 
 ## Requirements
 
-Install the required libraries before running the code:
-
 ```bash
-pip install tensorflow matplotlib tensorboard
+pip install numpy tensorflow matplotlib
 ```
+
+Question 1 needs only NumPy. Question 2 downloads the pretrained ResNet50
+weights (about 95 MB) and the `flower_photos` dataset (about 218 MB) on first
+run, so it needs an internet connection the first time. Both are cached
+afterwards.
 
 ## How to Run
 
-1. Clone this repository or download the project files.
-2. Open a terminal in the project folder.
-3. Run the Python file:
+The scripts live in `Home-Assignment-3/`, so run them from there:
 
 ```bash
-python assignment.py
+cd Home-Assignment-3
+
+python q1_convolution_from_scratch.py
+python q2_transfer_learning.py
 ```
 
-The program prints tensor shapes, ranks, and loss values in the terminal. It also opens two Matplotlib charts:
-
-- A bar chart comparing MSE and Categorical Cross-Entropy loss values
-- An accuracy chart comparing Adam and SGD training and validation accuracy
-
-After the TensorBoard model finishes training, log files are created in the `logs/fit/` folder.
-
-## Part 1: Tensor Reshaping and Operations
-
-The first section creates a random TensorFlow tensor with shape `(4, 6)`. The code prints the original tensor along with its rank and shape.
-
-The tensor is then reshaped into `(2, 3, 4)`. Reshaping changes how the same 24 values are arranged without changing the actual values because:
-
-```text
-4 × 6 = 2 × 3 × 4 = 24
-```
-
-Next, the reshaped tensor is transposed from `(2, 3, 4)` to `(3, 2, 4)`. The code swaps the first two axes using:
-
-```python
-tf.transpose(reshaped_tensor, perm=(1, 0, 2))
-```
-
-### Broadcasting
-
-The program creates a smaller tensor with shape `(1, 4)`:
-
-```python
-[[10, 20, 30, 40]]
-```
-
-It then adds this smaller tensor to the transposed tensor with shape `(3, 2, 4)`. TensorFlow automatically uses broadcasting so the two tensors can be added.
-
-TensorFlow compares tensor dimensions starting from the right side:
-
-- The last dimension is size `4` for both tensors, so it already matches.
-- The smaller tensor has a dimension of size `1`, which TensorFlow repeats to match size `2`.
-- The missing leading dimension is treated as size `1` and repeated to match size `3`.
-
-Because of this, TensorFlow can treat the smaller `(1, 4)` tensor as if it had shape `(3, 2, 4)` during addition. The original smaller tensor is not manually copied in the code.
-
-## Part 2: Loss Functions and Hyperparameter Tuning
-
-The second section compares two common loss functions:
-
-- **Mean Squared Error (MSE):** Measures the average squared difference between the true values and predicted values.
-- **Categorical Cross-Entropy (CCE):** Measures how well predicted class probabilities match the correct one-hot encoded class labels.
-
-The program defines one-hot encoded true labels for three classes and creates two sets of predictions:
-
-- `y_pred_good` contains predictions that are closer to the correct classes.
-- `y_pred_changed` contains less confident and less accurate predictions.
-
-The code calculates and prints MSE and CCE for both prediction sets. When the predictions become less accurate, the loss values increase.
-
-A Matplotlib bar chart is displayed to compare MSE and Cross-Entropy for the better predictions and the changed predictions.
-
-## Part 3: MNIST Training With Adam and SGD
-
-The third section loads the MNIST handwritten-digit dataset from TensorFlow. MNIST images are 28 × 28 pixels, and each image belongs to one of 10 digit classes from 0 through 9.
-
-The pixel values are normalized from the range 0–255 to the range 0–1. This helps the neural network train more smoothly.
-
-To keep the program faster to run, the code trains on the first 10,000 training images:
-
-```python
-x_train_small = x_train[:10000]
-y_train_small = y_train[:10000]
-```
-
-Both models use the same neural-network structure so the optimizer comparison is fair:
-
-- A `Flatten` layer converts each 28 × 28 image into one input vector.
-- A dense hidden layer with 128 ReLU neurons learns features from the image pixels.
-- A dropout layer with a rate of 0.2 helps reduce overfitting by randomly turning off some neurons during training.
-- A final dense layer with 10 softmax neurons produces a probability for each digit class.
-
-### Adam Model
-
-The first model uses the Adam optimizer with a learning rate of 0.001:
-
-```python
-optimizer=tf.keras.optimizers.Adam(learning_rate=0.001)
-```
-
-### SGD Model
-
-The second model uses Stochastic Gradient Descent (SGD) with a learning rate of 0.01 and momentum of 0.9:
-
-```python
-optimizer=tf.keras.optimizers.SGD(learning_rate=0.01, momentum=0.9)
-```
-
-Both models are trained for 5 epochs. The program then displays a graph comparing:
-
-- Adam training accuracy
-- Adam validation accuracy
-- SGD training accuracy
-- SGD validation accuracy
-
-The exact results can vary slightly between runs, but the plot makes it easy to compare how each optimizer learns over the five epochs.
-
-## Part 4: TensorBoard Logging
-
-The last section creates another MNIST model and trains it with the Adam optimizer for 5 epochs. A TensorBoard callback is added so TensorFlow saves training information during each epoch.
-
-The logs are saved in a unique timestamped folder inside:
-
-```text
-logs/fit/
-```
-
-The callback used in the program is:
-
-```python
-tensorboard_callback = tf.keras.callbacks.TensorBoard(
-    log_dir=log_dir,
-    histogram_freq=1
-)
-```
-
-This saves training and validation information, including loss and accuracy, that can be viewed in TensorBoard.
-
-### Launch TensorBoard
-
-After running the Python program, open a terminal in the project folder and run:
+Question 1 finishes instantly. Question 2 trains two models and accepts an
+`EPOCHS` environment variable for a quicker run:
 
 ```bash
-tensorboard --logdir logs/fit
+EPOCHS=1 python q2_transfer_learning.py
 ```
 
-TensorBoard will provide a local web address in the terminal. Open that address in a browser to view the available dashboards.
+---
 
-In TensorBoard, the Scalars tab can be used to view:
+## Question 1: Implement Convolution from Scratch
 
-- Training accuracy
-- Validation accuracy
-- Training loss
-- Validation loss
+### Input
 
-The Histograms tab can also show how model weights change during training because the code uses `histogram_freq=1`.
+```text
+Input matrix (5x5)        Filter (3x3)
+ 1  1  1  0  0             1  0  1
+ 0  1  1  1  0             0  1  0
+ 0  0  1  1  1             1  0  1
+ 0  0  1  1  0
+ 0  1  1  0  0
+```
 
-## Files
+Stride = 1, padding = 0.
 
-- `assignment.py` — Main Python source code for all four tasks
-- `README.md` — Project documentation, assignment explanation, and student information
-- `logs/fit/` — TensorBoard event logs created after the TensorBoard model runs
+### Approach
+
+No built-in convolution function is used. `convolve2d()` does the work with two
+plain Python loops:
+
+1. **(a) NumPy storage** - the input and filter are `np.array` objects built by
+   `build_input_matrix()` and `build_filter()`.
+2. **(b) Sliding the filter** - the two loops walk the top-left corner of the
+   window across the input. The loop counters are multiplied by the stride,
+   which is what makes a larger stride skip positions.
+3. **(c) Dot product** - at each location the patch sitting under the filter is
+   sliced out and combined with `np.sum(region * kernel)`, an element-by-element
+   multiply followed by a sum.
+4. **(d) and (e)** - the feature map and its shape are printed.
+
+The output size comes from the standard formula, with integer division
+discarding any position where the filter would hang off the edge:
+
+```text
+output_size = (N - F + 2P) / S + 1
+```
+
+### Output Feature Map
+
+**Stride = 1, Padding = 0** -> shape **3 x 3**
+
+```text
+  4   3   4
+  2   4   3
+  2   3   4
+```
+
+Worked example for the top-left value: the window covers
+
+```text
+1 1 1        1 0 1
+0 1 1   .*   0 1 0   ->  (1+0+1) + (0+1+0) + (0+0+1)  =  4
+0 0 1        1 0 1
+```
+
+This result was cross-checked against `tf.nn.conv2d` and matches exactly. The
+check is valid here because this particular filter is symmetric under a
+180-degree rotation, so true convolution and the cross-correlation that
+frameworks actually compute give the same answer.
+
+### (f) Effect of changing the stride from 1 to 2
+
+The script also computes the stride 2 result so the explanation can point at
+real numbers:
+
+**Stride = 2, Padding = 0** -> shape **2 x 2**
+
+```text
+  4   4
+  2   4
+```
+
+The stride is how far the filter moves between positions. At stride 1 the
+window shifts one column at a time and visits every valid location, giving a
+3 x 3 output. At stride 2 it skips every other position, starting only at rows
+and columns 0 and 2, giving a 2 x 2 output. The same formula predicts both:
+`(5 - 3) / 1 + 1 = 3` and `(5 - 3) / 2 + 1 = 2`.
+
+A larger stride downsamples the feature map. That cuts computation and memory
+in the following layer and widens the receptive field of later layers, at the
+cost of spatial detail, since positions the filter skipped are never measured.
+
+Worth noticing in the two outputs above: the stride 2 map is not a summary or
+an average of the stride 1 map, it is a literal **subset** of it. Every value
+in the 2 x 2 result (4, 4, 2, 4) appears in the 3 x 3 result at the corners
+that both strides happened to visit. Striding discards measurements rather than
+combining them, which is exactly what distinguishes it from pooling.
+
+---
